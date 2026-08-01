@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학습 중 — RecallDeck</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<svg class="curve-backdrop" viewBox="0 0 1200 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0,40 C150,40 150,340 300,340 C450,340 450,120 600,120 C750,120 750,300 900,300 C1050,300 1050,200 1200,200"
+        fill="none" stroke="#e2542b" stroke-width="1.5"/>
+</svg>
+
+<header class="study-header">
+  <button class="btn btn--ghost" onclick="window.location.href='index.html'">← 덱으로 돌아가기</button>
+  <span class="study-progress"><span id="deckName"></span> · 남은 카드 <span id="remainingCount">0</span> · 완료 <span id="sessionCount">0</span></span>
+</header>
+
+<div class="study-stage">
+  <div class="flashcard" id="flashcard">
+    <div class="flashcard__inner">
+      <div class="flashcard__face flashcard__face--front">
+        <span class="flashcard__hint" id="cardHint"></span>
+        <span class="flashcard__text" id="cardFront"></span>
+        <span class="flashcard__tap-hint">카드를 탭하면 정답이 보여요</span>
+      </div>
+      <div class="flashcard__face flashcard__face--back">
+        <span class="flashcard__text" id="cardBack"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grade-buttons hidden" id="gradeButtons">
+    <button class="grade-btn grade-btn--again" data-grade="again">
+      Again
+      <span class="grade-btn__preview" id="previewAgain"></span>
+    </button>
+    <button class="grade-btn grade-btn--hard" data-grade="hard">
+      Hard
+      <span class="grade-btn__preview" id="previewHard"></span>
+    </button>
+    <button class="grade-btn grade-btn--good" data-grade="good">
+      Good
+      <span class="grade-btn__preview" id="previewGood"></span>
+    </button>
+    <button class="grade-btn grade-btn--easy" data-grade="easy">
+      Easy
+      <span class="grade-btn__preview" id="previewEasy"></span>
+    </button>
+  </div>
+
+  <div class="study-empty hidden" id="emptyState">
+    <div class="study-empty__mark">✓</div>
+    <p>오늘 학습할 카드를 모두 끝냈어요. 이번 세션에서 <span id="finishedCount">0</span>개를 복습했습니다.</p>
+    <button class="btn btn--primary" onclick="window.location.href='index.html'">덱 목록으로</button>
+  </div>
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/srs.js"></script>
+<script src="js/app-study.js"></script>
+</body>
+</html>

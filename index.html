@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RecallDeck — 나만의 단어 암기장</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<svg class="curve-backdrop" viewBox="0 0 1200 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0,40 C150,40 150,340 300,340 C450,340 450,120 600,120 C750,120 750,300 900,300 C1050,300 1050,200 1200,200"
+        fill="none" stroke="#e2542b" stroke-width="1.5"/>
+</svg>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="brand__mark">RecallDeck</span>
+    <span class="brand__tag">Ebbinghaus SRS</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn--ghost" id="settingsBtn">⚙ 설정</button>
+    <button class="btn btn--primary" id="newDeckBtn">+ 새 덱</button>
+  </div>
+</header>
+
+<main>
+  <!-- ========== 덱 목록 화면 ========== -->
+  <section id="deckListView">
+    <p class="view-heading">내 덱</p>
+    <div class="deck-grid" id="deckGrid"></div>
+    <div class="empty-state hidden" id="deckEmptyState">
+      <p>아직 만든 덱이 없어요</p>
+      <p>오른쪽 위 “+ 새 덱” 버튼으로 첫 덱을 만들어보세요.</p>
+    </div>
+  </section>
+
+  <!-- ========== 덱 상세 화면 ========== -->
+  <section id="deckDetailView" class="hidden">
+    <button class="btn btn--ghost" id="backToDeckList">← 덱 목록으로</button>
+
+    <div class="deck-detail-header">
+      <h2 id="deckDetailName"></h2>
+      <div class="deck-detail-actions">
+        <button class="btn btn--danger" id="deleteDeckBtn">덱 삭제</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel__title">단어 추가</p>
+      <form class="add-word-form" id="addWordForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="wordInput">영단어</label>
+            <input type="text" id="wordInput" placeholder="예: reiterate" required autocomplete="off">
+          </div>
+          <button type="button" class="mode-toggle" id="addWordModeToggle">AI 자동 생성 모드</button>
+        </div>
+        <div class="field hidden" id="meaningField">
+          <label for="meaningInput">뜻 (직접 입력)</label>
+          <textarea id="meaningInput" rows="2" placeholder="쉬운 영어 뜻풀이를 직접 입력하세요"></textarea>
+        </div>
+        <div class="field-row" style="align-items:center;">
+          <button type="submit" class="btn btn--primary" id="addWordSubmit">단어 추가</button>
+          <span class="add-word-status" id="addWordStatus"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <p class="panel__title">학습 시작</p>
+      <div class="study-cta">
+        <span id="dueTodayLabel">오늘 학습할 단어: 0개</span>
+        <button class="btn btn--primary" id="studyStartBtn" disabled>학습 모드 선택 →</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel__title">단어 목록</p>
+      <ul class="card-list" id="cardList"></ul>
+      <div class="empty-state hidden" id="cardEmptyState">
+        <p>등록된 단어가 없어요</p>
+        <p>위 입력창에서 첫 단어를 추가해보세요.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ========== 새 덱 만들기 모달 ========== -->
+<div class="modal-backdrop hidden" id="newDeckModal">
+  <div class="modal">
+    <h3>새 덱 만들기</h3>
+    <form id="newDeckForm">
+      <div class="field">
+        <label for="newDeckInput">덱 이름</label>
+        <input type="text" id="newDeckInput" placeholder="예: 토익, 수능, 일상 회화" required autocomplete="off">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="newDeckCancel">취소</button>
+        <button type="submit" class="btn btn--primary">만들기</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========== 학습 모드 선택 모달 ========== -->
+<div class="modal-backdrop hidden" id="studyModeModal">
+  <div class="modal">
+    <h3>학습 모드 선택</h3>
+    <div class="study-mode-list">
+      <button class="study-mode-option" data-mode="word2meaning">
+        <strong>단어 → 뜻</strong>
+        <span>영단어를 보고 뜻을 떠올려보세요</span>
+      </button>
+      <button class="study-mode-option" data-mode="meaning2word">
+        <strong>뜻 → 단어</strong>
+        <span>뜻을 보고 영단어를 떠올려보세요</span>
+      </button>
+      <button class="study-mode-option" data-mode="random">
+        <strong>랜덤 (교차)</strong>
+        <span>카드마다 방향이 무작위로 섞입니다</span>
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn--ghost" id="studyModeCancel">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 설정 모달 ========== -->
+<div class="modal-backdrop hidden" id="settingsModal">
+  <div class="modal">
+    <h3>설정</h3>
+    <form id="settingsForm">
+      <div class="field" style="margin-bottom:12px;">
+        <label for="apiKeyInput">Gemini API 키</label>
+        <input type="password" id="apiKeyInput" placeholder="AIza..." autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="modelSelect">Gemini 모델 (무료 티어)</label>
+        <select id="modelSelect">
+          <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (가장 빠르고 가벼움, 추천)</option>
+          <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="settingsCancel">취소</button>
+        <button type="submit" class="btn btn--primary">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/srs.js"></script>
+<script src="js/gemini.js"></script>
+<script src="js/app-decks.js"></script>
+</body>
+</html>
